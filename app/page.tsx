@@ -1,5 +1,11 @@
-import Image from 'next/image';
+import React, {FunctionComponent} from 'react';
+import Products from './products/page';
 
-export default function Home() {
-  return (<>Hello world!</>);
+const Home: FunctionComponent = () => {
+  return (
+    <>
+      <Products/>
+    </>
+  );
 }
+export default Home;

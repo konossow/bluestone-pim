@@ -1,29 +1,53 @@
-import {createSlice, Middleware} from '@reduxjs/toolkit';
-import {RootState} from '../../app/store';
+import {createSlice, PayloadAction} from '@reduxjs/toolkit';
+import { Product } from '../model/Product';
 
-interface ProductsState {
-  value: number;
-  status: 'idle' | 'loading' | 'failed';
-}
+type ProductsState = Product[];
 
-const initialState: ProductsState = {
-  value: 0,
-  status: 'idle',
-};
-
-const STORAGE_KEY = 'products'
-
-const loadState = (): ProductsState | undefined => {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY)
-    if (!raw) {
-      return undefined;
-    }
-    return JSON.parse(raw) as ProductsState
-  } catch (e) {
-    console.warn('Failed to load state from localStorage', e);
+const initialState: ProductsState = [
+  {
+    "name": "b0006se5bq",
+    "number": "singing coach unlimited",
+    "description": "singing coach unlimited - electronic learning products (win me nt 2000 xp)",
+    "images": [
+      {
+        "url": "https://picsum.photos/400/300",
+        "name": "singing coach"
+      },
+      {
+        "url": "https://broken.link.for.testing.notexistingtopleveldomain/400/300",
+        "name": "front side"
+      }
+    ]
+  },
+  {
+    "name": "b00021xhzw",
+    "number": "adobe after effects professional 6.5 upgrade from standard to professional",
+    "description": "upgrade only; installation of after effects standard new disk caching tools speed up your interactive work save any combination of animation parameters as presets",
+    "images": []
+  },
+  {
+    "name": "b00021xhzw",
+    "number": "domino designer/developer v5.0",
+    "description": "reference domino designer/developer r5 doc pack includes the following titles: application development with domino designer (intermediate-advanced) 536 pages",
+    "images": [
+      {
+        "url": "https://picsum.photos/400/300",
+        "name": "cover"
+      }
+    ]
   }
-}
+];
+
+const STORAGE_KEY = 'products';
+
+const loadState = (): ProductsState => {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    return raw ? JSON.parse(raw) : initialState;
+  } catch {
+    return initialState;
+  }
+};
 
 const saveState = (state: ProductsState) => {
   try {
@@ -33,40 +57,20 @@ const saveState = (state: ProductsState) => {
   }
 }
 
-const localStorageMiddleware: Middleware<{}, RootState> =
-  store => next => action => {
-    const result = next(action)
-    const state = store.getState()
-    saveState(state as any)
-    return result
-  }
-
 export const productsSlice = createSlice({
   name: 'products',
-  initialState,
+  initialState: loadState(),
   reducers: {
-    // increment: (state) => {
-    //   // Redux Toolkit allows us to write "mutating" logic in reducers. It
-    //   // doesn't actually mutate the state because it uses the Immer library,
-    //   // which detects changes to a "draft state" and produces a brand new
-    //   // immutable state based off those changes
-    //   state.value += 1;
-    // },
-    // decrement: (state) => {
-    //   state.value -= 1;
-    // },
-    // // Use the PayloadAction type to declare the contents of `action.payload`
-    // incrementByAmount: (state, action: PayloadAction<number>) => {
-    //   state.value += action.payload;
-    // },
+    updateProduct: (products, action: PayloadAction<Product>) => {
+      const index = products.findIndex(p => p.name === action.payload.name)
+      if (index !== -1) {
+        products[index] = action.payload;
+        saveState(products);
+      }
+    },
   }
 });
 
-export const {} = productsSlice.actions;
-
-// The function below is called a selector and allows us to select a value from
-// the state. Selectors can also be defined inline where they're used instead of
-// in the slice file. For example: `useSelector((state: RootState) => state.counter.value)`
-export const selectProducts = (state: RootState) => state.products.value;
+export const {updateProduct} = productsSlice.actions;
 
 export default productsSlice.reducer;
